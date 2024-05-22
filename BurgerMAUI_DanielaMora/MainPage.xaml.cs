@@ -1,24 +1,26 @@
-﻿namespace BurgerMAUI_DanielaMora
+﻿using BurgerMAUI_DanielaMora.Models;
+using Newtonsoft.Json;
+
+namespace BurgerMAUI_DanielaMora
 {
     public partial class MainPage : ContentPage
     {
-        int count = 0;
-
         public MainPage()
         {
             InitializeComponent();
         }
 
-        private void OnCounterClicked(object sender, EventArgs e)
+        private void Button_Clicked(object sender, EventArgs e)
         {
-            count++;
-
-            if (count == 1)
-                CounterBtn.Text = $"Clicked {count} time";
-            else
-                CounterBtn.Text = $"Clicked {count} times";
-
-            SemanticScreenReader.Announce(CounterBtn.Text);
+            var client = new HttpClient();
+            client.BaseAddress = new Uri("https://localhost:7216/api/");
+            var response = client.GetAsync("burger").Result;
+            if (response.IsSuccessStatusCode)
+            {
+                var burgers = response.Content.ReadAsStringAsync().Result;
+                var burgersList = JsonConvert.DeserializeObject<List<Burger>>(burgers);
+                listView.ItemsSource = burgersList;
+            }
         }
     }
 
